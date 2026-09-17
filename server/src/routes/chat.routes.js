@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Message = require("../models/Message");
 const Setting = require("../models/Setting");
 const { requireAdmin } = require("../middleware/auth");
@@ -6,6 +7,10 @@ const { chatbotReply, welcomeMessage } = require("../utils/chatbot");
 const { normalizeEmail, isValidEmail, sanitizeText } = require("../utils/validators");
 
 const router = express.Router();
+
+function databaseIsReady() {
+  return mongoose.connection.readyState === 1;
+}
 
 router.get("/admin/conversations/list", requireAdmin, async (req, res) => {
   const conversations = await Message.aggregate([
@@ -37,6 +42,14 @@ router.post("/customer", async (req, res) => {
     const cleanText = sanitizeText(text, 1000);
     if (cleanText.length < 1) {
       return res.status(400).json({ message: "Message cannot be empty" });
+    }
+    if (!databaseIsReady()) {
+      const now = new Date().toISOString();
+      return res.status(201).json({
+        customerMessage: { _id: `temporary-customer-${Date.now()}`, customerEmail: normalizedEmail, sender: "customer", text: cleanText, createdAt: now },
+        autoReply: { _id: `temporary-bot-${Date.now()}`, customerEmail: normalizedEmail, sender: "bot", text: chatbotReply(cleanText), createdAt: now },
+        persisted: false
+      });
     }
     const customerMessage = await Message.create({
       customerEmail: normalizedEmail,
@@ -92,6 +105,20 @@ router.post("/welcome", async (req, res) => {
     if (!isValidEmail(normalizedEmail)) {
       return res.status(400).json({ message: "Invalid customer email" });
     }
+    if (!databaseIsReady()) {
+      return res.status(201).json({
+        duplicated: false,
+        skipped: false,
+        persisted: false,
+        messages: [{
+          _id: `temporary-welcome-${Date.now()}`,
+          customerEmail: normalizedEmail,
+          sender: "bot",
+          text: welcomeMessage(false),
+          createdAt: new Date().toISOString()
+        }]
+      });
+    }
     const existingCount = await Message.countDocuments({ customerEmail: normalizedEmail });
     if (existingCount > 0) {
       const messages = await Message.find({ customerEmail: normalizedEmail }).sort({ createdAt: 1 });
@@ -112,6 +139,7 @@ router.get("/:customerEmail", async (req, res) => {
   if (!isValidEmail(customerEmail)) {
     return res.status(400).json({ message: "Invalid customer email" });
   }
+  if (!databaseIsReady()) return res.json([]);
   const messages = await Message.find({ customerEmail }).sort({ createdAt: 1 });
   return res.json(messages);
 });
