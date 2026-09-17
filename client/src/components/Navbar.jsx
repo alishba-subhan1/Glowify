@@ -114,6 +114,7 @@ export default function Navbar() {
               <NavLink
                 to={item.to}
                 end={item.to === "/"}
+                onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
                   [
                     linkBase,
@@ -127,7 +128,6 @@ export default function Navbar() {
                   ].join(" ")
                 }
               >
-                onClick={() => setMobileOpen(false)}
                 {t(item.key, item.fallback)}
               </NavLink>
             </motion.span>
@@ -137,6 +137,7 @@ export default function Navbar() {
             <motion.span key={item.to} className="contents" variants={navItem}>
               <NavLink
                 to={item.to}
+                onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
                   [
                     linkBase,
@@ -152,7 +153,6 @@ export default function Navbar() {
                   ].join(" ")
                 }
               >
-                onClick={() => setMobileOpen(false)}
                 {t(item.key, item.fallback)}
               </NavLink>
             </motion.span>
