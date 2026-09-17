@@ -24,6 +24,7 @@ const { stripeWebhookHandler } = require("./stripeWebhook");
 
 const app = express();
 let isDatabaseConnected = false;
+let databasePromise;
 
 app.use(
   cors({
@@ -110,7 +111,10 @@ async function createServerOnAvailablePort(appHandler, preferredPort) {
   process.exit(1);
 }
 
-async function start() {
+async function connectDatabase() {
+  if (databasePromise) return databasePromise;
+
+  databasePromise = (async () => {
   isDatabaseConnected = false;
   try {
     await mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 10000 });
@@ -134,6 +138,13 @@ async function start() {
       console.error("[bootstrap] Warning (server still listening):", err.message);
     }
   }
+  })();
+
+  return databasePromise;
+}
+
+async function start() {
+  await connectDatabase();
 
   const { server: httpServer, port: actualPort } = await createServerOnAvailablePort(app, port);
 
@@ -161,4 +172,8 @@ async function start() {
   });
 }
 
-start();
+if (require.main === module) {
+  start();
+}
+
+module.exports = { app, connectDatabase };
