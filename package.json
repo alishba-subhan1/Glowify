@@ -1,0 +1,11 @@
+{
+  "name": "glowify",
+  "private": true,
+  "scripts": {
+    "postinstall": "npm --prefix client install",
+    "dev": "npm --prefix client run dev -- --host 0.0.0.0",
+    "start": "npm --prefix client run dev -- --host 0.0.0.0",
+    "build": "npm --prefix client run build",
+    "install:client": "npm --prefix client install"
+  }
+}
