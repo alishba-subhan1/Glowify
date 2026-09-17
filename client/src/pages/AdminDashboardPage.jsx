@@ -40,6 +40,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
   const [messages, setMessages] = useState([]);
   const [chatText, setChatText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [savingService, setSavingService] = useState(false);
+  const [savingCategory, setSavingCategory] = useState(false);
   /** Data browser */
   const [dbCollections, setDbCollections] = useState([]);
   const [dbCollection, setDbCollection] = useState("");
@@ -173,6 +175,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
 
   async function handleServiceSubmit(event) {
     event.preventDefault();
+    if (savingService) return;
+    setSavingService(true);
     const method = editingServiceId ? "PUT" : "POST";
     const path = editingServiceId ? `/services/${editingServiceId}` : "/services";
     try {
@@ -183,6 +187,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
       showToast(editingServiceId ? "Service updated" : "Service created", "success");
     } catch (err) {
       handleError(err);
+    } finally {
+      setSavingService(false);
     }
   }
 
@@ -237,6 +243,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
   async function createCategory(event) {
     event.preventDefault();
     if (!categoryForm.name.trim()) return;
+    if (savingCategory) return;
+    setSavingCategory(true);
     try {
       await apiFetch("/categories", { method: "POST", body: JSON.stringify(categoryForm) }, token);
       setCategoryForm(initialCategory);
@@ -244,6 +252,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
       showToast("Category created", "success");
     } catch (err) {
       handleError(err);
+    } finally {
+      setSavingCategory(false);
     }
   }
 
@@ -564,8 +574,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
                 placeholder="Price"
               />
             </div>
-            <button className="btn-primary" type="submit">
-              {editingServiceId ? "Update Service" : "Create Service"}
+            <button className="btn-primary" type="submit" disabled={savingService}>
+              {savingService ? "Saving..." : editingServiceId ? "Update Service" : "Create Service"}
             </button>
           </MotionSurface>
 
@@ -621,8 +631,8 @@ export default function AdminDashboardPage({ token, admin, onLogout }) {
               value={categoryForm.description}
               onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
             />
-            <button className="btn-primary" type="submit">
-              Save Category
+            <button className="btn-primary" type="submit" disabled={savingCategory}>
+              {savingCategory ? "Saving..." : "Save Category"}
             </button>
           </MotionSurface>
           <div className="space-y-3">

@@ -54,6 +54,7 @@ export default function BookingPage() {
   const [suggestQuery, setSuggestQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [suggestLoading, setSuggestLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     Promise.all([apiFetch("/services"), apiFetch("/settings")])
@@ -122,10 +123,12 @@ export default function BookingPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (submitting) return;
     if (form.serviceId.startsWith("catalog::")) {
       showToast("This service is shown on website but not yet activated in admin panel.", "error");
       return;
     }
+    setSubmitting(true);
     try {
       const booking = await apiFetch("/bookings", {
         method: "POST",
@@ -183,6 +186,8 @@ export default function BookingPage() {
       setForm((prev) => ({ ...initialForm, customerEmail: prev.customerEmail }));
     } catch (err) {
       showToast(err.message, "error");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -372,8 +377,8 @@ export default function BookingPage() {
                 </div>
               )}
             </MotionSurface>
-            <button className="btn-primary" type="submit">
-              {t("booking.submit", "Confirm Booking")}
+            <button className="btn-primary" type="submit" disabled={submitting}>
+              {submitting ? "Submitting..." : t("booking.submit", "Confirm Booking")}
             </button>
           </form>
         </MotionSurface>

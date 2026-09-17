@@ -1,4 +1,5 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useI18n } from "../lib/i18n";
 import { aureliaEase } from "../motion/aureliaPreset";
@@ -16,6 +17,7 @@ const utilityNav = [{ to: "/admin", key: "nav.admin", fallback: "Admin" }];
 
 export default function Navbar() {
   const { pathname } = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
   const isHome = pathname === "/";
   const { t } = useI18n();
   const reduceMotion = useReducedMotion();
@@ -85,8 +87,24 @@ export default function Navbar() {
           </span>
         </Link>
 
+        <button
+          type="button"
+          aria-label="Open navigation menu"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((open) => !open)}
+          className={`flex h-10 w-10 items-center justify-center rounded-full border md:hidden ${
+            isHome ? "border-white/35 text-white" : "border-zinc-300 text-zinc-800"
+          }`}
+        >
+          <span className="flex flex-col gap-1" aria-hidden>
+            <span className="h-1 w-1 rounded-full bg-current" />
+            <span className="h-1 w-1 rounded-full bg-current" />
+            <span className="h-1 w-1 rounded-full bg-current" />
+          </span>
+        </button>
+
         <motion.nav
-          className="flex flex-wrap items-end justify-end gap-x-7 gap-y-3 md:gap-x-10"
+          className={`${mobileOpen ? "flex" : "hidden"} absolute left-4 right-4 top-full flex-col gap-1 rounded-2xl border border-zinc-200 bg-white p-3 shadow-xl md:static md:flex md:flex-row md:items-end md:justify-end md:gap-x-7 md:gap-y-3 md:border-0 md:bg-transparent md:p-0 md:shadow-none lg:gap-x-10`}
           variants={navContainer}
           initial="hidden"
           animate="show"
@@ -109,6 +127,7 @@ export default function Navbar() {
                   ].join(" ")
                 }
               >
+                onClick={() => setMobileOpen(false)}
                 {t(item.key, item.fallback)}
               </NavLink>
             </motion.span>
@@ -133,6 +152,7 @@ export default function Navbar() {
                   ].join(" ")
                 }
               >
+                onClick={() => setMobileOpen(false)}
                 {t(item.key, item.fallback)}
               </NavLink>
             </motion.span>
