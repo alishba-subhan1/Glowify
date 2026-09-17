@@ -1,0 +1,27 @@
+{
+  "name": "glowify-server",
+  "version": "1.0.0",
+  "description": "Glowify smart parlour backend",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "migrate": "node src/run-migrations.js",
+    "db:list": "node src/db-inspect.js",
+    "test:email": "node src/test-email.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.5.1",
+    "nodemailer": "^6.9.16",
+    "stripe": "^17.4.0",
+    "twilio": "^5.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

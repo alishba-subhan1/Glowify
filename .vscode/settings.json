@@ -1,0 +1,10 @@
+{
+  "terminal.integrated.defaultProfile.windows": "Glowify Cmd",
+  "terminal.integrated.profiles.windows": {
+    "Glowify Cmd": {
+      "path": "C:\\Windows\\System32\\cmd.exe",
+      "args": [],
+      "icon": "terminal-cmd"
+    }
+  }
+}

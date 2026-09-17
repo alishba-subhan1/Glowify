@@ -1,0 +1,436 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+.motion-page-root {
+  backface-visibility: hidden;
+  will-change: transform, opacity, filter;
+}
+
+/**
+ * Route content: subtle typography reveal on mount (skipped when reduced motion).
+ * `.motion-editorial` blocks keep their own Framer reveals — no double animation.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes siteTextReveal {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 0.5rem, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  .motion-page-text-layer :where(h1, h2, h3, h4, h5, h6, p, blockquote, li) {
+    animation: siteTextReveal 0.5s cubic-bezier(0.33, 1, 0.68, 1) both;
+  }
+
+  .motion-page-text-layer .motion-editorial :where(h1, h2, h3, h4, h5, h6, p, blockquote, li),
+  .motion-page-text-layer .motion-shop-frame :where(h1, h2, h3, h4, h5, h6, p, blockquote, li) {
+    animation: none;
+  }
+}
+
+/* GPU hint for editorial card motion (blur + translate + scale) */
+.motion-scroll-float {
+  backface-visibility: hidden;
+}
+
+.motion-editorial {
+  backface-visibility: hidden;
+  transform-origin: center center;
+  will-change: transform, opacity, filter;
+}
+
+/* Aurelia-like product frames — 3D tilt + image reveals; GPU layer */
+.motion-shop-frame.motion-editorial {
+  will-change: transform, opacity, filter;
+  transform-style: preserve-3d;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  background: #f8f6f3;
+  color: #121212;
+  font-weight: 500;
+}
+
+.glass {
+  background: #ffffff;
+  border: 1px solid rgba(212, 212, 216, 0.75);
+  backdrop-filter: blur(8px);
+}
+
+.card {
+  @apply glass rounded-2xl p-5 shadow-xl;
+  transition: box-shadow 0.28s ease, border-color 0.28s ease;
+}
+
+.card:hover {
+  box-shadow: 0 16px 26px rgba(17, 17, 17, 0.12);
+  border-color: rgba(122, 0, 27, 0.32);
+}
+
+.btn-primary {
+  @apply rounded-lg bg-glowifyRed px-4 py-2 font-semibold text-white transition hover:bg-red-900 hover:shadow-md disabled:opacity-60;
+}
+
+.btn-secondary {
+  @apply rounded-lg border border-zinc-300 bg-white px-4 py-2 font-semibold text-zinc-900 transition hover:border-glowifyRed hover:text-glowifyRed;
+}
+
+.input {
+  @apply w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 outline-none transition focus:border-glowifyRed;
+}
+
+.page-shell {
+  @apply mx-auto max-w-7xl px-4 py-8;
+}
+
+.section-title {
+  @apply text-2xl font-bold tracking-tight;
+}
+
+a:not(.btn-primary):not(.btn-secondary):hover {
+  color: #7a001b;
+}
+
+button:not(.btn-primary):not(.btn-secondary):hover {
+  border-color: rgba(122, 0, 27, 0.65);
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #111111, #7a001b 70%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  border-radius: 1rem;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.35));
+}
+
+.slider-shell {
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.slider-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.48s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.slider-slide-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--hero-focus-desktop, center);
+  display: block;
+  transform: scale(1);
+  transform-origin: center center;
+  backface-visibility: hidden;
+}
+
+.slider-slide.is-active {
+  opacity: 1;
+}
+
+.slider-slide.is-active .slider-slide-img {
+  animation: heroKenBurns 22s ease-in-out infinite alternate;
+}
+
+@keyframes heroKenBurns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.055);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider-slide {
+    transition: opacity 0.2s linear;
+  }
+  .slider-slide.is-active .slider-slide-img {
+    animation: none;
+    transform: none;
+  }
+}
+
+/* Aurelia-style editorial marquee (home hero strip) */
+.editorial-marquee-track {
+  display: flex;
+  width: max-content;
+  gap: 4rem;
+  animation: editorialMarqueeLine 32s linear infinite;
+  align-items: center;
+  padding: 0.55rem 0;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  color: rgba(250, 250, 249, 0.82);
+}
+
+.editorial-marquee-shell:hover .editorial-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes editorialMarqueeLine {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .slider-slide-img {
+    object-position: var(--hero-focus-mobile, var(--hero-focus-desktop, center));
+  }
+}
+
+.slider-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  transform: translateY(-50%);
+  height: 2.2rem;
+  width: 2.2rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(63, 63, 70, 0.25);
+  background: rgba(255, 255, 255, 0.8);
+  color: #111;
+  font-size: 1.3rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.slider-arrow:hover {
+  background: rgba(122, 0, 27, 0.92);
+  border-color: rgba(122, 0, 27, 0.8);
+  color: #fff;
+}
+
+.slider-dot {
+  height: 0.52rem;
+  width: 1.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(82, 82, 91, 0.34);
+  background: rgba(113, 113, 122, 0.35);
+  transition: all 0.25s ease;
+}
+
+.slider-dot.is-active {
+  width: 2.5rem;
+  border-color: rgba(122, 0, 27, 0.9);
+  background: rgba(122, 0, 27, 0.92);
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 1s cubic-bezier(0.33, 1, 0.68, 1),
+    transform 1s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gallery-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: galleryMarquee 14s linear infinite;
+}
+
+.gallery-shell:hover .gallery-track {
+  animation-play-state: paused;
+}
+
+.gallery-card {
+  flex: 0 0 auto;
+  width: min(300px, 78vw);
+  max-width: 320px;
+  border-radius: 0;
+  overflow: hidden;
+  border: 1px solid rgba(113, 113, 122, 0.24);
+}
+
+.gallery-card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
+.top-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: topMarquee 30s linear infinite;
+}
+
+.top-marquee-track span {
+  padding: 0 1.2rem;
+  white-space: nowrap;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.7s ease both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease both;
+}
+
+.animate-float {
+  animation: floatBlob 6s ease-in-out infinite;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes floatBlob {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes galleryMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes topMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Luxury service cards — CapCut-style pulsing / blinking frame (gold + white).
+   Box-shadow only so Framer Motion can own transforms (lift, scale, 3D hover). */
+@keyframes luxuryCapcutFrameGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 215, 0, 0.26),
+      0 0 14px rgba(255, 215, 0, 0.14),
+      0 0 32px rgba(255, 215, 0, 0.07),
+      0 20px 52px -22px rgba(0, 0, 0, 0.52);
+  }
+  11% {
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.52),
+      0 0 22px rgba(255, 215, 0, 0.82),
+      0 0 48px rgba(255, 215, 0, 0.38),
+      0 0 72px rgba(255, 215, 0, 0.12),
+      0 20px 52px -22px rgba(0, 0, 0, 0.48);
+  }
+  20% {
+    box-shadow:
+      0 0 0 1px rgba(255, 215, 0, 0.18),
+      0 0 10px rgba(255, 215, 0, 0.1),
+      0 20px 52px -22px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(255, 215, 0, 0.78),
+      0 0 28px rgba(255, 215, 0, 0.48),
+      0 0 58px rgba(255, 215, 0, 0.2),
+      0 0 88px rgba(255, 255, 255, 0.06),
+      0 24px 58px -18px rgba(212, 175, 55, 0.14);
+  }
+  74% {
+    box-shadow:
+      0 0 0 1px rgba(255, 215, 0, 0.32),
+      0 0 18px rgba(255, 215, 0, 0.22),
+      0 20px 52px -22px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.luxury-capcut-frame {
+  animation: luxuryCapcutFrameGlow 1.65s ease-in-out infinite;
+  border-radius: 1rem;
+  transform-origin: center center;
+  will-change: box-shadow;
+}
+
+.luxury-capcut-frame:hover {
+  animation-duration: 1.2s;
+  filter: brightness(1.05) drop-shadow(0 0 18px rgba(255, 215, 0, 0.35));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .luxury-capcut-frame,
+  .luxury-capcut-frame:hover {
+    animation: none;
+    filter: none;
+    box-shadow: 0 20px 52px -22px rgba(0, 0, 0, 0.52);
+    will-change: auto;
+  }
+}
